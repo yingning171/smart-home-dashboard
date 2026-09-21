@@ -99,13 +99,59 @@ if (!window.echarts) { document.write('<script src="https://cdnjs.cloudflare.com
   .chart-box h3{font-size:13px;font-weight:600;color:var(--sub);padding:0 6px 6px}
   .chart{width:100%;height:250px}
 
-  /* ===== 背景装饰（自然融入的角落摆设） ===== */
+  /* ===== 背景装饰（固定角落的互动摆设，不随页面滚动） ===== */
   .bg-decor{position:fixed;inset:0;z-index:0;pointer-events:none}
-  .bg-decor img{position:absolute;opacity:.92;
+  .bg-decor > div{position:absolute;pointer-events:auto;cursor:pointer;outline:none}
+  .bg-decor img{width:100%;height:auto;display:block;opacity:.92;
     filter:drop-shadow(0 6px 14px rgba(120,100,70,.12))}
   .b-pot{left:clamp(8px,2.5vw,42px);bottom:clamp(20px,10vh,90px);width:clamp(110px,12vw,190px)}
-  .b-cat{right:clamp(8px,3vw,52px);top:clamp(120px,22vh,220px);width:clamp(90px,9vw,140px);opacity:.82}
+  .b-cat{right:clamp(8px,3vw,52px);top:clamp(120px,22vh,220px);width:clamp(90px,9vw,140px)}
+  .b-cat img{opacity:.84}
   .b-dog{right:clamp(10px,5vw,84px);bottom:clamp(16px,8vh,70px);width:clamp(100px,10vw,160px)}
+
+  /* 盆栽浇水：轻摆 + 水滴落下 */
+  .b-pot{transform-origin:50% 100%}
+  .b-pot.watering{animation:potWiggle .6s ease-in-out 2}
+  @keyframes potWiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-2.5deg)}75%{transform:rotate(2.5deg)}}
+  .drop{position:absolute;top:-10px;left:50%;width:7px;height:11px;border-radius:60%;
+    background:linear-gradient(180deg,rgba(140,205,240,.95),rgba(90,170,230,.85));
+    opacity:0;pointer-events:none}
+  .b-pot.watering .drop{animation:dropFall .75s ease-in forwards}
+  .b-pot.watering .drop.d2{animation-delay:.28s}
+  .b-pot.watering .drop.d3{animation-delay:.56s}
+  @keyframes dropFall{
+    0%{opacity:0;transform:translate(-50%,0) scale(.6)}
+    12%{opacity:1}
+    100%{opacity:0;transform:translate(-50%,86px) scale(1)}
+  }
+
+  /* 猫：蹭手轻摆 + 呼噜气泡 */
+  .b-cat{transform-origin:50% 90%}
+  .b-cat.pet{animation:catPet .55s ease-in-out 2}
+  @keyframes catPet{
+    0%,100%{transform:rotate(0) translateY(0)}
+    30%{transform:rotate(-3.5deg) translateY(-5px)}
+    65%{transform:rotate(3.5deg) translateY(-2px)}
+  }
+  .bubble{position:absolute;top:-30px;right:0;white-space:nowrap;font-size:12px;color:#8a6d4b;
+    background:#fff;border:1px solid rgba(200,180,150,.6);border-radius:12px;padding:3px 9px;
+    box-shadow:0 3px 8px rgba(120,100,70,.15);opacity:0;pointer-events:none}
+  .bubble::after{content:'';position:absolute;bottom:-5px;left:14px;width:9px;height:9px;background:#fff;
+    border-right:1px solid rgba(200,180,150,.6);border-bottom:1px solid rgba(200,180,150,.6);transform:rotate(45deg)}
+  .b-cat.pet .bubble{animation:bubbleUp 1.7s ease forwards}
+  @keyframes bubbleUp{
+    0%{opacity:0;transform:translateY(6px) scale(.85)}
+    18%{opacity:1;transform:translateY(0) scale(1)}
+    78%{opacity:1}
+    100%{opacity:0;transform:translateY(-18px) scale(1.02)}
+  }
+
+  /* 狗：蹦跳 + 汪汪气泡 */
+  .b-dog{transform-origin:50% 100%}
+  .b-dog.pet{animation:dogJump .42s ease-in-out 3}
+  @keyframes dogJump{0%,100%{transform:translateY(0)}50%{transform:translateY(-13px)}}
+  .b-dog .bubble{right:auto;left:-18px;top:-24px}
+  .b-dog.pet .bubble{animation:bubbleUp 1.7s ease forwards}
 
   /* ===== 页脚 ===== */
   footer{margin-top:16px;font-size:12px;color:var(--dim);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
@@ -119,7 +165,8 @@ if (!window.echarts) { document.write('<script src="https://cdnjs.cloudflare.com
     .cards4,.cards2{grid-template-columns:1fr}
     header{flex-direction:column;align-items:flex-start}
     .bg-decor{z-index:2;opacity:1}
-    .bg-decor img{opacity:.5}
+    .bg-decor img{opacity:.55}
+    .bubble{font-size:10px;padding:2px 7px;top:-24px}
     .b-pot{left:6px;bottom:10px;width:76px}
     .b-cat{right:6px;top:150px;width:58px}
     .b-dog{right:16px;bottom:12px;width:66px}
@@ -211,11 +258,22 @@ if (!window.echarts) { document.write('<script src="https://cdnjs.cloudflare.com
     </div>
   </section>
 
-  <!-- ===== 背景装饰：绿植与萌宠自然融入 ===== -->
-  <div class="bg-decor" aria-hidden="true">
-    <img class="b-pot" src="assets/pot.png" alt="">
-    <img class="b-cat" src="assets/cat.png" alt="">
-    <img class="b-dog" src="assets/dog.png" alt="">
+  <!-- ===== 背景装饰：可互动的绿植与萌宠（固定角落） ===== -->
+  <div class="bg-decor">
+    <div class="b-pot" role="button" tabindex="0" aria-label="给盆栽浇水" title="点击浇水">
+      <img src="assets/pot.png" alt="">
+      <span class="drop" aria-hidden="true"></span>
+      <span class="drop d2" aria-hidden="true"></span>
+      <span class="drop d3" aria-hidden="true"></span>
+    </div>
+    <div class="b-cat" role="button" tabindex="0" aria-label="摸摸小猫" title="摸摸我">
+      <img src="assets/cat.png" alt="">
+      <span class="bubble" aria-hidden="true">呼噜~</span>
+    </div>
+    <div class="b-dog" role="button" tabindex="0" aria-label="摸摸小狗" title="摸摸我">
+      <img src="assets/dog.png" alt="">
+      <span class="bubble" aria-hidden="true">汪！</span>
+    </div>
   </div>
 
   <footer>
@@ -480,6 +538,24 @@ if (!window.echarts) { document.write('<script src="https://cdnjs.cloudflare.com
     if (chartTemp) chartTemp.resize();
     if (chartLs) chartLs.resize();
   });
+
+  /* ===== 装饰互动：浇水 / 撸猫 / 摸狗 ===== */
+  function playAnim(el, cls){
+    el.classList.remove(cls);
+    void el.offsetWidth;          // 强制回流，让动画可重复触发
+    el.classList.add(cls);
+  }
+  function bindDecor(el, cls){
+    if(!el) return;
+    el.addEventListener('click', function(){ playAnim(el, cls); });
+    el.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); playAnim(el, cls); }
+    });
+  }
+  bindDecor(document.querySelector('.b-pot'), 'watering');
+  bindDecor(document.querySelector('.b-cat'), 'pet');
+  bindDecor(document.querySelector('.b-dog'), 'pet');
+
   fetchFeeds();
   setInterval(fetchFeeds, POLL_MS);
 })();
